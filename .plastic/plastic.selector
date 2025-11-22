@@ -1,4 +1,0 @@
-repository "CG Project/CG Project@18966964605841@cloud"
-  path "/"
-    br "/main"
-    co "/main"

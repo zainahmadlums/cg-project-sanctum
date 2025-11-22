@@ -1,5 +1,8 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
+//these numbers all for capsule height 1.9, radius 0.5
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
@@ -12,13 +15,20 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody rb;
     private bool isGrounded;
+    private bool resettable;
     private Vector2 moveInput;
     private PlayerInputActions input;
+    private Animator anim;
+    private CapsuleCollider col;
+    public Transform model; // reference to the robot model
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         input = new PlayerInputActions();
+        anim = model.GetComponent<Animator>();
+        col = GetComponent<CapsuleCollider>();
+
     }
 
     void OnEnable()
@@ -39,6 +49,27 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         Move();
+        isGrounded = Physics.SphereCast(
+            transform.position + Vector3.up * (0.1f - col.height / 2 + col.radius), // sphere origin
+            col.radius * 0.8f,           // sphere radius
+            Vector3.down,     // direction
+            out RaycastHit hit,
+            0.15f     // distance to cast
+        );
+        // isGrounded = Physics.Raycast(
+        //     transform.position + Vector3.up * 0.05f,
+        //     Vector3.down,
+        //     (col.height * 0.5f) + 0.1f
+        // );
+        anim.SetBool("Jumping", !isGrounded);
+        if (resettable && isGrounded)
+        {
+            anim.SetBool("JumpStarted", false);
+            resettable = false;
+        } else if (!isGrounded)
+        {
+            resettable = true;
+        }
     }
 
     void Move()
@@ -58,19 +89,25 @@ public class PlayerController : MonoBehaviour
 
         rb.AddForce(velChange, ForceMode.VelocityChange);
 
+        float speed = rb.linearVelocity.magnitude;
+        anim.SetFloat("Speed", speed, 0.15f, Time.deltaTime);
+
         if (moveDir.magnitude > 0.1f)
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(moveDir), 10f * Time.deltaTime);
+            model.rotation = Quaternion.Slerp(model.rotation, Quaternion.LookRotation(moveDir), 10f * Time.deltaTime);
     }
 
     void TryJump()
     {
         if (!isGrounded) return;
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        isGrounded = false;
+        anim.SetBool("JumpStarted", true);
+        // isGrounded = false;
+        // anim.SetBool("Jumping", !isGrounded);
     }
 
-    void OnCollisionStay(Collision collision)
-    {
-        isGrounded = true;
-    }
+    // void OnCollisionStay(Collision collision)
+    // {
+    //     isGrounded = true;
+    //     anim.SetBool("Jumping", !isGrounded);
+    // }
 }
