@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
     private CapsuleCollider col;
     public Transform model; // reference to the robot model
+    private float knockbackTimer; // <--- ADD THIS
 
     void Awake()
     {
@@ -74,6 +75,11 @@ public class PlayerController : MonoBehaviour
 
     void Move()
     {
+        if (knockbackTimer > 0)
+        {
+            knockbackTimer -= Time.deltaTime;
+            return; // Skip input movement while stunned
+        }
         Vector3 forward = cameraTransform.forward;
         Vector3 right = cameraTransform.right;
         forward.y = 0;
@@ -110,4 +116,12 @@ public class PlayerController : MonoBehaviour
     //     isGrounded = true;
     //     anim.SetBool("Jumping", !isGrounded);
     // }
+    public void ApplyKnockback(Vector3 force, float stunDuration)
+    {
+        knockbackTimer = stunDuration;
+        rb.linearVelocity = Vector3.zero; // Reset current movement so the hit feels impactful
+        rb.AddForce(force, ForceMode.Impulse);
+    }
+
+    
 }

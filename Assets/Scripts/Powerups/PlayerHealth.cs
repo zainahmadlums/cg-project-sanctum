@@ -15,15 +15,15 @@ public class PlayerHealth : MonoBehaviour
         healthBarUI.RefreshUI(currentHealth);
     }
 
-    private void Update()
-    {
-        // TEST KEYS
-        if (Keyboard.current.yKey.wasPressedThisFrame)
-            TakeDamage(1);
+    // private void Update()
+    // {
+    //     // TEST KEYS
+    //     if (Keyboard.current.yKey.wasPressedThisFrame)
+    //         TakeDamage(1);
 
-        if (Keyboard.current.hKey.wasPressedThisFrame)
-            Heal(1);
-    }
+    //     if (Keyboard.current.hKey.wasPressedThisFrame)
+    //         Heal(1);
+    // }
 
     public void Heal(int amount)
     {
@@ -56,13 +56,25 @@ public class PlayerHealth : MonoBehaviour
 
     private void OnDeath()
     {
-        if (isDead) return;     // prevent multiple reloads
+        // if (isDead) return;     // prevent multiple reloads
+        // isDead = true;
+
+        // // optional delay so UI animations finish
+        // float reloadDelay = 0.4f; 
+
+        // Invoke(nameof(ReloadScene), reloadDelay);
+
+        if (isDead) return;
         isDead = true;
 
-        // optional delay so UI animations finish
-        float reloadDelay = 0.4f; 
+        // pause game but allow tweens
+        Time.timeScale = 0;
 
-        Invoke(nameof(ReloadScene), reloadDelay);
+        DeathEffects.Instance.PlayDeathEffect(() =>
+        {
+            Time.timeScale = 1;
+            ReloadScene();
+        });
     }
 
     private void ReloadScene()

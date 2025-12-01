@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 8d19c08824ac7be41941cd37e3c76a08
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 196494
+  packageName: Temple Asset Pack
+  packageVersion: 1.0
+  assetPath: Assets/TemplePack/Materials/CustomShaders/sm_flame.shader
+  uploadId: 442141

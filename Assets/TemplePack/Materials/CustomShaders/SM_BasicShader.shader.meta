@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: c86cddc38ffa4cd498df904bfa9d9888
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 196494
+  packageName: Temple Asset Pack
+  packageVersion: 1.0
+  assetPath: Assets/TemplePack/Materials/CustomShaders/SM_BasicShader.shader
+  uploadId: 442141

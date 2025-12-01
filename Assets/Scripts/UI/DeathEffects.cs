@@ -7,8 +7,11 @@ public class DeathEffects : MonoBehaviour
     public static DeathEffects Instance;
 
     public CanvasGroup canvasGroup;
-    public RectTransform screenRoot;   // some root panel for shake
-    public float blackoutTime = 0.5f;
+    public Image flashImage;
+    public RectTransform screenRoot;
+    public ThirdPersonCamera cameraRef;
+
+    public float blackoutTime = 0.3f;
 
     void Awake()
     {
@@ -18,25 +21,75 @@ public class DeathEffects : MonoBehaviour
 
     public void PlayDeathEffect(System.Action onComplete)
     {
-        // STOP any prior tween nonsense
-        DOTween.Kill(canvasGroup);
-        DOTween.Kill(screenRoot);
+        DOTween.KillAll(true);
 
         Sequence seq = DOTween.Sequence().SetUpdate(true);
 
-        // 1. violent screen shake (0.2s)
-        seq.Append(screenRoot.DOShakeAnchorPos(0.2f, 35f, 60, 90f, false));
+        void FlashInstant(Color col)
+        {
+            flashImage.color = col;
+            canvasGroup.alpha = 1;
+        }
 
-        // 2. flash white really fast (0.1s)
-        seq.Join(canvasGroup.DOFade(1f, 0.1f));
+        float shakeDur = 0.04f;
+        float flashHold = 0.04f;
 
-        // 3. fade to black (instead of white) for dramatic effect
-        seq.AppendCallback(() => canvasGroup.GetComponent<Image>().color = Color.black);
+        // FIXED HELPER SHAKE
+        Tween Shake(float dur)
+        {
+            // Create the UI shake tween
+            Tween t = screenRoot.DOShakeAnchorPos(dur, 22f, 40, 90f, false);
+            
+            // Hook into the OnPlay event. 
+            // This ensures the camera shake only triggers when this tween actually Starts.
+            t.OnPlay(() => {
+                 if (cameraRef) cameraRef.ShakeCamera(dur, 0.5f);
+            });
 
-        // keep it black for ~0.5 sec
+            return t;
+        }
+
+        // Pre-made transparent colors
+        Color w = new Color(1, 1, 1, 0.5f);
+        Color g = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+        Color c = new Color(0, 0, 0, 0f);
+        Color b = new Color(0, 0, 0, 1f);
+
+        // =============== SEQUENCE ===============
+
+        seq.AppendCallback(() => FlashInstant(w));
+        seq.Join(Shake(shakeDur));
+        seq.AppendInterval(flashHold);
+
+        seq.AppendCallback(() => FlashInstant(g));
+        seq.Join(Shake(shakeDur));
+        seq.AppendInterval(flashHold);
+
+        seq.AppendCallback(() => FlashInstant(w));
+        seq.Join(Shake(shakeDur));
+        seq.AppendInterval(flashHold);
+
+        seq.AppendCallback(() => FlashInstant(new Color(0,0,0,0.5f)));
+        seq.Join(Shake(shakeDur));
+        seq.AppendInterval(flashHold);
+
+        seq.AppendCallback(() => FlashInstant(w));
+        seq.Join(Shake(shakeDur));
+        seq.AppendInterval(flashHold);
+
+        seq.AppendCallback(() => FlashInstant(c)); 
+        canvasGroup.alpha = 0;
+        seq.Join(Shake(shakeDur));
+        seq.AppendInterval(flashHold);
+
+        seq.AppendCallback(() => FlashInstant(w));
+        seq.Join(Shake(shakeDur));
+        seq.AppendInterval(flashHold);
+
+        // FINAL BLACK
+        seq.AppendCallback(() => FlashInstant(b));
         seq.AppendInterval(blackoutTime);
 
-        // when done → callback to reload scene
         seq.OnComplete(() => onComplete?.Invoke());
     }
 }

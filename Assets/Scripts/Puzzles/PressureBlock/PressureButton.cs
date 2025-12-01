@@ -2,7 +2,9 @@ using UnityEngine;
 
 public class PressureButton : MonoBehaviour
 {
-    public DoorController connectedDoor;
+    // Now this can accept a Door, a Trap, a Lift, anything.
+    public Mechanism targetMechanism;
+    
     public float pressDepth = 0.1f;
     private Vector3 startPos;
     private int triggerCount = 0;
@@ -18,7 +20,9 @@ public class PressureButton : MonoBehaviour
         {
             triggerCount++;
             transform.localPosition = startPos - Vector3.up * pressDepth;
-            connectedDoor.Activate();
+            
+            // Send signal to the brain
+            if (targetMechanism) targetMechanism.AddTrigger();
         }
     }
 
@@ -30,7 +34,9 @@ public class PressureButton : MonoBehaviour
             if (triggerCount <= 0)
             {
                 transform.localPosition = startPos;
-                connectedDoor.Deactivate();
+                
+                // Send signal to the brain
+                if (targetMechanism) targetMechanism.RemoveTrigger();
             }
         }
     }
